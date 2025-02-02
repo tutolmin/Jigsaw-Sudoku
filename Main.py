@@ -1,17 +1,31 @@
 import numpy as np
+#from datetime import datetime
+#import time
 
-with open('Sudoku_Regions.txt') as f:
+with open('Sudoku_Regions_13.txt') as f:
     content = f.read()
 dict_construct = 'regions_dict = {' + content + '}'
 regions_dict = {}
 exec(dict_construct)
-numbers_set = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+numbers_set = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
 
 
 def construct_sudoku_array():
-    with open('Sudoku.txt') as f:
-        file_content = list(filter((lambda x: x != ',' and x != '\n'), list(f.read())))
-    sudoku_array = np.array(file_content, dtype=int).reshape(9, 9)
+    with open('Sudoku_13.txt') as f:
+
+        # Читаем все строки из файла
+        lines = f.readlines()
+
+        # Обрабатываем каждую строку
+        file_content = []
+        for line in lines:
+            # Удаляем лишние пробелы и символы новой строки, затем разделяем по запятым
+            values = line.strip().split(',')
+
+            # Преобразуем каждое значение в целое число и добавляем в список
+            file_content.append([int(x) for x in values])
+
+    sudoku_array = np.array(file_content)
     return sudoku_array
 
 
@@ -61,6 +75,10 @@ def solve(sudoku_array):
         if solve(sudoku_array):
             return True
         sudoku_array[empty_index] = 0
+    # Получаем текущее время
+#    now = datetime.now()
+#    if now.second == 0:
+#        print(sudoku_array)
     return False
 
 
