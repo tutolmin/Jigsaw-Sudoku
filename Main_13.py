@@ -2,17 +2,21 @@ import numpy as np
 import traceback
 import sys
 
-with open('Sudoku_Regions.txt') as f:
+with open('Sudoku_Regions_13.txt') as f:
     content = f.read()
 dict_construct = 'regions_dict = {' + content + '}'
 regions_dict = {}
 exec(dict_construct)
-numbers_set = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+numbers_set = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
 
 def fancy_board(sudoku, file=False):
 
     # Коды для фона разных регионов
     background_colors = {
+        'region_13' : '\033[48;5;250m', 
+        'region_12' : '\033[48;5;245m', 
+        'region_11' : '\033[48;5;233m',
+        'region_10' : '\033[48;5;244m', 
         'region_9' : '\033[48;5;232m', 
         'region_8' : '\033[48;5;245m', 
         'region_3' : '\033[48;5;233m',
@@ -29,25 +33,43 @@ def fancy_board(sudoku, file=False):
         f = open('out.txt', 'w')
         sys.stdout = f
 
-    for i in range(sudoku.shape[0]): 
-        print("BRD: ", end='')
+    for i in range(sudoku.shape[0]):
         for j in range(sudoku.shape[1]):
             region = find_region(i, j)
             symbol = sudoku[i][j]
             if symbol == 0:
                 symbol = '.'
-            print(background_colors[region], symbol, "\033[0m", end='')
+            elif symbol == 10:
+                symbol = 'A'                
+            elif symbol == 11:
+                symbol = 'B'
+            elif symbol == 12:
+                symbol = 'C'
+            elif symbol == 13:
+                symbol = 'D'
+            print(background_colors[region], symbol, "\033[0m", end='')            
         print()
     
     if file:
         sys.stdout = orig_stdout
         f.close()
 
-
 def construct_sudoku_array():
-    with open('Sudoku.txt') as f:
-        file_content = list(filter((lambda x: x != ',' and x != '\n'), list(f.read())))
-    sudoku_array = np.array(file_content, dtype=int).reshape(9, 9)
+    with open('Sudoku_13.txt') as f:
+
+        # Читаем все строки из файла
+        lines = f.readlines()
+
+        # Обрабатываем каждую строку
+        file_content = []
+        for line in lines:
+            # Удаляем лишние пробелы и символы новой строки, затем разделяем по запятым
+            values = line.strip().split(',')
+
+            # Преобразуем каждое значение в целое число и добавляем в список
+            file_content.append([int(x) for x in values])
+
+    sudoku_array = np.array(file_content)
     return sudoku_array
 
 
@@ -151,6 +173,7 @@ def find_singles(board):
                     possible_values -= {board[k][j] for k in range(n)}
                     print("Possible values after column check", possible_values)
                     # Убираем числа, которые уже есть в регионе
+#                    region_name = find_region((i, j))
                     cells_in_region = regions_dict[find_region(i, j)]
                     possible_values -= {board[x][y] for x, y in cells_in_region}
                     print("Possible values after region check", possible_values)
@@ -165,7 +188,7 @@ def find_singles(board):
                         board[i][j] = value
                         print("MSG: Found single", value, "at", i, j)
                         fancy_board(board)
-                        found_single = True 
+                        found_single = True
 
         if found_single:
             continue
@@ -181,7 +204,6 @@ def find_singles(board):
 
             # массив для подсчёта кандидатов региона
             reg_cand = np.zeros(shape=(len(board)), dtype=int)
-#            reg_cand = set(range(1, n+1))
 
             # проходимся по каждой ячейке региона
             for c in cells_in_region:
@@ -358,7 +380,6 @@ def find_singles(board):
                                     found_single = True 
 
     return True
-
 
 sudoku = construct_sudoku_array()
 
